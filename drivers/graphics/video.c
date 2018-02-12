@@ -1,11 +1,6 @@
-#include "../../include/types.h"
-#include "../../include/io.h"
 
-#define __TEXT_MODE__				0
-#define __CURSOR_COL__				80
-#define __CURSOR_ROW__				25
-#define __ADDR_VIDEO__				0xB8000
-#define __SIZE_MAX_VIDEO__  		0xB8FA0
+#include "display.h"
+
 
  uint8_t cursorX = 0;
  uint8_t cursorY = 0;
@@ -21,11 +16,11 @@ __void__ __move_Cursor__(uint8_t x, uint8_t y){
 	outb(0x3d5, (uint8_t) (pos_cur >> 8));
 }
 
-__static__ __void__ __show_Cursor__(__void__){
+__void__ __show_Cursor__(__void__){
 	__move_Cursor__(cursorX, cursorY);
 }
 
-__static__ __void__ __hide_Cursor__(__void__){
+__void__ __hide_Cursor__(__void__){
 	__move_Cursor__(-1, -1);
 }
 
@@ -52,13 +47,13 @@ __static__ __void__ __kernelPutCharMem__(uint8_t d, uint8_t c){
 		/* code */
 		cursorY++;
 		cursorX = 0;
+	}else{
+		videoMemory = (((__CURSOR_COL__ *cursorY+cursorX)*2) + (uint8_t*) __ADDR_VIDEO__);
+		*videoMemory = data;
+		*(videoMemory+1) = color;
+		++cursorX;
 	}
-	
-	videoMemory = (((__CURSOR_COL__ *cursorY+cursorX)*2) + (uint8_t*) __ADDR_VIDEO__);
-	*videoMemory = data;
-	*(videoMemory+1) = color;
-	++cursorX;
-	__blink_Cursor__();
+	__show_Cursor__();
 	if (cursorY>=25)
 	{
 		/* code */
@@ -71,7 +66,7 @@ __static__ __void__ __kernelPutCharMem__(uint8_t d, uint8_t c){
 				*videoMemory = *tmp;
 				*(videoMemory+1) = *(tmp+1);
 			}else{
-				*videoMemory = 0x20;
+				*videoMemory = 0x0;
 				*(videoMemory+1) = color;
 			}
 			
@@ -82,7 +77,7 @@ __static__ __void__ __kernelPutCharMem__(uint8_t d, uint8_t c){
 
 }
 
-__void__ __kprint_video__(const char* str){
+__void__ __kprint_video__(uint8_t* str){
 	
 	for (int i = 0; str[i]!=0; i++)
 	{
@@ -90,11 +85,9 @@ __void__ __kprint_video__(const char* str){
 		__kernelPutCharMem__(str[i],0x0f);
 
 	}
-	
-
 }
 
-__extern__ __void__ __kernel_Put_Chr__(uint8_t d, uint8_t c){
+__void__ __kernel_Put_Chr__(uint8_t d, uint8_t c){
 	__kernelPutCharMem__(d, c);
 }
 
@@ -108,4 +101,5 @@ __void__ __cleanterm__(){
 	}
 	cursorX = 0;
 	cursorY = 0;
+	__show_Cursor__();
 }

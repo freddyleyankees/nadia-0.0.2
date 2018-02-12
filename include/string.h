@@ -32,6 +32,7 @@ uint8_t __isString__(__void__);
 uint8_t __getChar__(__void__);
 
 __void__ __putChar__(uint8_t);
+__void__ test(__void__);
 
 uint8_t* str_buffer;
 #endif

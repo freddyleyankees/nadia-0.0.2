@@ -1,44 +1,147 @@
-;
-; boot.asm -- Kernel start location. Also defines multiboot header.
-;           Based on Bran's kernel development tutorial file start.asm
-;
+%define BASE    0x1000  ; 0x1000:0x0 = 10000
+%define KSIZE   128     ; nombre de secteurs a charger
+%define CODE_DESC   0x8
+%define DATA_DESC   0x10
+%define NULL_DESC   0x0
 
-EXTERN main
-GLOBAL start
-.bss
-MBOOT_PAGE_ALIGN    equ 1<<0    ; Load kernel and modules on a page boundary
-MBOOT_MEM_INFO      equ 1<<1    ; Provide your kernel with memory info
-MBOOT_HEADER_MAGIC  equ 0x1BADB002 ; Multiboot Magic value
-; NOTE: We do not use MBOOT_AOUT_KLUDGE. It means that GRUB does not
-; pass us a symbol table.
-MBOOT_HEADER_FLAGS  equ MBOOT_PAGE_ALIGN | MBOOT_MEM_INFO
-MBOOT_CHECKSUM      equ -(MBOOT_HEADER_MAGIC + MBOOT_HEADER_FLAGS)
+[BITS 16]
+[ORG 0x0]
 
-
-[BITS 32]                       ; All instructions should be 32-bit.
-
-[GLOBAL mboot]                  ; Make 'mboot' accessible from C.
-.code
-mboot:
-    dd MBOOT_HEADER_MAGIC      ; GRUB will search for this value on each
-                                ; 4-byte boundary in your kernel file
-    dd MBOOT_HEADER_FLAGS      ; How GRUB should load your file / settings
-    dd MBOOT_CHECKSUM          ; To ensure that the above values are correct
-    dd mboot
-    dd code
-    dd bss
-    dd end
-    dd start
-
-
+jmp start
+%include "util0.inc"
+%include "a20.inc"
 start:
-    ; Load multiboot information:
-    push    ebx
 
-    ; Execute the kernel:
-    cli                         ; Disable interrupts.
-    call main                   ; call our main() function.
-    jmp $                       ; Enter an infinite loop, to stop the processor
-                                ; executing whatever rubbish is in the memory
-                                ; after our kernel!
-.end
+;-------------------------------;
+;   Setup segments and stack    ;
+;-------------------------------;
+
+    ;move boot sector up to adress 90000
+
+    mov ax, 9000h  ; stack en 0xFFFF
+    mov es, ax
+    xor di, di
+
+    mov ax, 07C0h
+    mov ds, ax
+    xor si, si
+    mov cx, 512
+    rep
+    movsb
+
+    jmp 0x9000:point_check
+
+point_check:
+
+    mov ax, cs
+    mov ds, ax
+    mov es, ax
+    mov ss, ax
+    mov sp, 0x0fff 
+
+; recuparation de l'unite de boot
+    mov [_BOOTDRIVER_], dl    
+
+;--------------------;
+;   print message    ;
+;--------------------; 
+
+    mov si, MsgLoad
+    call afficher
+
+    mov si, loadKernelMsg
+    call afficher
+
+;-----------------------------------------------;
+;   Reset and load system at address 0x10000     ;
+; from second sector on boot Boot Disk          ;
+;-----------------------------------------------;
+
+    xor ax, ax
+    int 0x13
+
+    push es
+    mov ax, BASE
+    mov es, ax
+    mov bx, 0
+    mov ah, 2
+    mov al, KSIZE
+    mov ch, 0
+    mov cl, 2
+    mov dh, 0
+    mov dl, [_BOOTDRIVER_]
+    int 0x13
+    pop es
+
+
+;-----------------------------------------------;
+;   install our GDT (Global Descriptor Table)   ;
+;-----------------------------------------------;
+
+; initialisation du pointeur sur la GDT
+    mov ax, gdtend    ; calcule la limite de GDT
+    mov bx, gdt
+    sub ax, bx
+    mov word [gdtptr], ax
+
+    xor eax, eax      ; calcule l'adresse lineaire de GDT
+    xor ebx, ebx
+    mov ax, ds
+    mov ecx, eax
+    shl ecx, 4
+    mov bx, gdt
+    add ecx, ebx
+    mov dword [gdtptr+2], ecx
+    call _EnableA20
+; passage en modep
+    cli
+    ;---------------------------------------;
+    ;   move system from 0x1000 at 0x0000   ;
+    ;---------------------------------------;
+
+    lgdt [gdtptr]    ; charge la gdt
+    sti
+    mov si, gdtMsg
+    call afficher
+    cli
+
+    mov eax, cr0
+    or  ax, 1
+    mov cr0, eax        ; PE mis a 1 (CR0)
+
+    jmp next
+
+next:
+    mov ax, DATA_DESC        ; segment de donne
+    mov ds, ax
+    mov fs, ax
+    mov gs, ax
+    mov es, ax
+    mov ss, ax
+    mov esp, 0x9F000  
+
+    jmp dword CODE_DESC:0x10000      ; reinitialise le segment de code
+
+;--------------------------------------------------------------------
+badDiskMsg      db 13,10," BootDisk error ... Computer must restart", 13, 10, 0
+MsgLoad         db 13,10,"loading system ...", 13, 10, 0
+_BOOTDRIVER_      DB   00h        ;Drive boot sector came from
+loadKernelMsg   db 13,10,'Nadia 0.01 is preparing to load, Please wait ...',13, 10, 0
+gdtMsg   db 13,10,'GDT loading ...',13, 10, 0
+;--------------------------------------------------------------------
+gdt:
+    db 0, 0, 0, 0, 0, 0, 0, 0
+gdt_cs:
+    db 0xFF, 0xFF, 0x0, 0x0, 0x0, 10011011b, 11011111b, 0x0
+gdt_ds:
+    db 0xFF, 0xFF, 0x0, 0x0, 0x0, 10010011b, 11011111b, 0x0
+gdtend:
+;--------------------------------------------------------------------
+gdtptr:
+    dw 0  ; limite
+    dd 0  ; base
+;--------------------------------------------------------------------
+
+;; NOP jusqu'a 510
+times 510-($-$$) db 0
+dw 0xAA55

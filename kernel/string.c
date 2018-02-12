@@ -31,7 +31,7 @@ uint8_t* __itoa__(int32_t a){
 uint8_t* __itoab__(int32_t a, uint8_t base){
 	uint8_t mod,tmp;
 	uint32_t i=0,n;
-	n = (uint8_t) a;
+	n = a;
 	
 	i=0;
 	do{
@@ -64,11 +64,7 @@ uint8_t* __itoab__(int32_t a, uint8_t base){
 			case 16:
 				mod = n%base;
 				str_buffer[i++] = (mod < 10) ? (mod + '0') : (mod-10 + 'a');
-				if (n/base == 0 && a<0x10)
-				{
-					/* code */
-					str_buffer[i++] = '0';
-				}
+				
 				break;
 			default:
 				mod = n%10;
@@ -107,5 +103,9 @@ uint32_t __stroccur__(uint8_t* strocc, uint8_t* str){
 }
 
 uint32_t __strmem__(uint8_t* str){
+	
+}
+
+uint8_t __getChar__(__void__){
 	
 }

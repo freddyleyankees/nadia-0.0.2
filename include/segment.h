@@ -1,5 +1,8 @@
 #include "types.h"
 #ifdef __MEMORY_H__
+__extern__ uint32_t end;
+#define LOW_MEMORY &end
+#define HIGH_MEMORY 0x1000000
 	__void__ __memset__ (uint8_t*,uint8_t,uint32_t);
 	__void__ __memcpy__ (uint32_t,uint32_t,uint8_t);
 	__void__ __get_byte__ (uint32_t,uint32_t,uint8_t);

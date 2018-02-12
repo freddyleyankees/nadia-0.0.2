@@ -3,6 +3,7 @@
 #endif
 #include "../include/handler.h"
 #include "../include/io.h"
+#include "../include/panic.h"
 
 __extern__ __void__ __kprint_video__(char* str);
 
@@ -13,7 +14,6 @@ __void__ __register_int_handler__(uint32_t n, __isr_t__ handler){
 }
 
 __extern__ __void__ __isr_handler__(registers_t reg){
-	__kprint_video__("interrupt handler int $0x");
 	if (int_handler[reg.num_int] != 0)
     {
         __isr_t__ handler = int_handler[reg.num_int];

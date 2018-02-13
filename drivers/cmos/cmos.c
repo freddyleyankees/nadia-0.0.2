@@ -1,3 +1,11 @@
+/**
+ *	Nadia operating system 
+ *  @Author Kabong freddy
+ *  @copyright(c) 2017 - 2018
+ *  @Email freddyleyankees@gmail.com
+ * 
+ */
+
 #ifndef __CMOS_DRIVER_H__
 #define __CMOS_DRIVER_H__
 #include "../../include/types.h"

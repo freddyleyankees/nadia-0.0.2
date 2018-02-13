@@ -1,3 +1,11 @@
+/**
+ *	Nadia operating system 
+ *  @Author Kabong freddy
+ *  @copyright(c) 2017 - 2018
+ *  @Email freddyleyankees@gmail.com
+ * 
+ */
+
 #ifndef __IDT_H__
 #define __IDT_H__
 #define __MEMORY_H__

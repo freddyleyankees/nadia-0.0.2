@@ -1,3 +1,11 @@
+/**
+ *	Nadia operating system 
+ *  @Author Kabong freddy
+ *  @copyright(c) 2017 - 2018
+ *  @Email freddyleyankees@gmail.com
+ * 
+ */
+
 #include "types.h"
 #ifdef __MEMORY_H__
 __extern__ uint32_t end;

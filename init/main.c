@@ -1,3 +1,11 @@
+/**
+ *	Nadia operating system 
+ *  @Author Kabong freddy
+ *  @copyright(c) 2017 - 2018
+ *  @Email freddyleyankees@gmail.com
+ * 
+ */
+
 #include "../include/types.h"
 #ifndef __DESCR_TABLE_H__
 #define __DESCR_TABLE_H__
@@ -42,5 +50,6 @@ __void__ main(__void__* multiboot_struct){
 	__init_keyboard_driver__();
 	initHandlerConsole();
 	start_console();
+
 	while(1);
 }

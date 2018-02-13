@@ -1,3 +1,11 @@
+/**
+ *	Nadia operating system 
+ *  @Author Kabong freddy
+ *  @copyright(c) 2017 - 2018
+ *  @Email freddyleyankees@gmail.com
+ * 
+ */
+
 #include "config.h"
 #ifndef __TYPES_H__
 #define __TYPES_H__

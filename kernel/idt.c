@@ -1,6 +1,12 @@
+/**
+ *	Nadia operating system 
+ *  @Author Kabong freddy
+ *  @copyright(c) 2017 - 2018
+ *  @Email freddyleyankees@gmail.com
+ * 
+ */
+
 #include "../include/idt.h"
-
-
 
 idt_entry_t idt_entry[256];
 idt_ptr_t idt_ptr;

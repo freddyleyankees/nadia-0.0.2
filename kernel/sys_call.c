@@ -1,3 +1,11 @@
+/**
+ *	Nadia operating system 
+ *  @Author Kabong freddy
+ *  @copyright(c) 2017 - 2018
+ *  @Email freddyleyankees@gmail.com
+ * 
+ */
+
 #ifndef __SYS_CALL_H__
 #define __SYS_CALL_H__
 #include "..include/sys_call.h"

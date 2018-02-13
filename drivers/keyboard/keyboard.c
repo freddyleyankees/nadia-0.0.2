@@ -118,11 +118,11 @@ uint8_t scanCode[] = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,		/*esc*/
 					  
 
 						};
-
+buffChr = 0;
 uint8_t* currentscanCode;
 uint8_t kbdDefined = __KEYBOARD_NO_DEFINE__;
 
-__extern__ __void__ __kprint_video__(const char* str);
+__extern__ __void__ __kprint_video__(uint8_t* str);
 __extern__ __void__ __kernel_Put_Chr__(uint8_t, uint8_t );
 
 __static__ uint8_t* __get_kbd__(){
@@ -135,10 +135,6 @@ __static__ __void__ __set_kbd__(uint8_t type){
 			currentscanCode = scanCode;
 			break;
 	}
-}
-
-uint8_t __getChar__(__void__){
-
 }
 
 __static__ uint8_t __load_kbd__(uint8_t scan){
@@ -287,11 +283,8 @@ __static__ uint8_t __fn_key_controller__(struct __ctrl_key_struct__* __strt_keyc
 __static__ __void__ __kbd_callback__(registers_t reg){
 	uint8_t scan_code,ctrl;
 	uint8_t* str;
-	scan_code = __read_input_port_kbd__();							/* read data in output port */
-	str = __itoab__(scan_code, 16);
-	__kprint_video__(" ");
-	__kprint_video__(str);
-	__kprint_video__(" ");
+	__static__ uint32_t i = 0;
+	scan_code = __read_input_port_kbd__();
 	ctrl = __fn_key_controller__(&key_controller, scan_code);
 	if (kbdDefined != __KEYBOARD_DEFINE__)
 	{
@@ -333,8 +326,11 @@ __static__ __void__ __kbd_callback__(registers_t reg){
 		}
 	}
 	else{
-		if(scan_code<0x80)
+		if(scan_code<0x80){
+			
 			__kernel_Put_Chr__(__load_kbd__(scan_code),0x0f);
+
+		}
 	}
 
 	

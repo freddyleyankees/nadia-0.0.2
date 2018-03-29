@@ -1,10 +1,10 @@
 /**
-* Nadia OS descriptor file .c
-*
-* This file describe 
-*
-* @author : kabong freddy
-*/
+ *	Nadia operating system 
+ *  @Author Kabong freddy
+ *  @copyright(c) 2017 - 2018
+ *  @Email freddyleyankees@gmail.com
+ * 
+ */
 
 #include "../include/types.h"
 #include "../include/io.h"

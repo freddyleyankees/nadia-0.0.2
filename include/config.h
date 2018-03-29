@@ -1,3 +1,10 @@
+/**
+ *	Nadia operating system 
+ *  @Author Kabong freddy
+ *  @copyright(c) 2017 - 2018
+ *  @Email freddyleyankees@gmail.com
+ * 
+ */
 
 #ifndef __volatile__
 #define __volatile__ volatile

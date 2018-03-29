@@ -1,11 +1,16 @@
+/**
+ *	Nadia operating system 
+ *  @Author Kabong freddy
+ *  @copyright(c) 2017 - 2018
+ *  @Email freddyleyankees@gmail.com
+ * 
+ */
+
 #ifndef __ISR_H__
 #define __ISR_H__
 #endif
 #include "../include/handler.h"
 #include "../include/io.h"
-#include "../include/panic.h"
-
-__extern__ __void__ __kprint_video__(char* str);
 
 __isr_t__ int_handler[256];
 

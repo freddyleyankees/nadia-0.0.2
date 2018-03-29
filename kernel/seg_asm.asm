@@ -100,6 +100,15 @@ __asm_isr_def__:
       jmp __irq_common_int__
 %endmacro
 
+%macro SYS_CALL_HANDLER 1  
+   [GLOBAL __sys_call__]
+   __sys_call__:
+      cli
+      push byte 0
+      push byte %1
+      jmp __irq_common_int__
+%endmacro
+
 ISR_HANDLER_NOERRCODE 0
 ISR_HANDLER_NOERRCODE 1
 ISR_HANDLER_NOERRCODE 2
@@ -149,3 +158,5 @@ IRQ_HANDLER 12, 44
 IRQ_HANDLER 13, 45
 IRQ_HANDLER 14, 46
 IRQ_HANDLER 15, 47
+
+SYS_CALL_HANDLER 96

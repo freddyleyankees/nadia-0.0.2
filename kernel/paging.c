@@ -1,97 +1,123 @@
-
-#define __PAGING_H__
-#define __MEMORY_H__
+/**
+ *	Nadia operating system 
+ *  @Author Kabong freddy
+ *  @copyright(c) 2017 - 2018
+ *  @Email freddyleyankees@gmail.com
+ * 
+ */
+#define __PAGE_DIRECTORY__
+#include "../drivers/vram/display.h"
+#include "../include/string.h"
 #include "../include/paging.h"
 #include "../include/panic.h"
-#include "../drivers/graphics/display.h"
+#include "../include/alloc.h"
+#include "../include/mem.h"
+#include "../include/bitmap.h"
 
-uint32_t* frames;
-page_directory_t* page_dir, *current_page_dir;
-uint32_t n_frames;
-uint32_t start_addr = (uint32_t) LOW_MEMORY; // address allocation start in &end
+page_directory_t *page_dir;
 
-head_t* kheap;
- 
+
+page_t *get_page(uint32_t frame,uint32_t build, page_directory_t* dir){
+    uint32_t n_frame = FRAME_NUMBER(frame);
+    uint32_t index = n_frame/PAGE_DIRECTORY_SIZE;
+    uint32_t offset = n_frame%PAGE_DIRECTORY_SIZE;
+    if(dir->tables[index]){
+        return &dir->tables[index]->pages[offset];
+    }
+    else if(build){
+        uint32_t tmp;
+        uint8_t* str;
+        dir->tables[index] = (page_table_t*) mem_kmalloc_phy_aligned(sizeof(page_table_t), &tmp);
+        dir->tables_physical[index] = tmp | 0x7;// present | rw | user
+        return &dir->tables[index]->pages[offset];
+    }
+    else{
+        return 0;
+    }
+}
+
+
+__void__ kfree_page(page_t* page){
+    uint32_t frame;
+    if (!(frame=page->frame))
+    {
+        return;
+    }
+    else
+    {
+        
+        clear_bit_frame(bitmap,frame);
+        page->frame = 0x0;
+    }
+}
+
+__void__ kalloc_identy_page(uint32_t addr, uint32_t kernel, uint32_t rw){
+    page_t* page = get_page(addr,1,current_page_dir);
+    if(page->frame != 0){
+        panic("this page is allocated!");
+        return; // this page is allocated
+    }
+    else{
+        addr = FRAME_NUMBER(addr);
+        if (test_bit_frame(bitmap, addr)){
+            panic("this page is reserved!\n");
+            return;
+        }
+        set_bit_frame(bitmap, addr);
+        page->present = 1;
+        page->user = (kernel)?1:0;
+        page->rw = (rw)?0:1;
+        page->frame = addr;
+    }
+}
+
+__void__ kalloc_page(page_t *page, uint32_t kernel, uint32_t rw){
+    uint8_t* str;
+    if(page->frame != 0){
+        return; // this 
+    }
+    else{
+        uint32_t index = get_free_frame(bitmap);
+        if(index == (uint32_t)-1){
+            panic("no free page unavailable!\n");
+        }
+        set_bit_frame(bitmap,index);
+        page->present = 1;
+        page->user = (kernel)?1:0;
+        page->rw = (rw)?0:1;
+        page->frame = index;
+    }
+}
+
 __void__ __init_paging__(__void__){
-    __kprint_video__("paging initialize --- [ ok ] \n");
+    uint32_t st_h = memory_info_system.mem_info_heap_frame_start;
+    uint32_t size_h = memory_info_system.mem_info_heap_addr_size;
     //init page directory
     //init page table
     //able paging and swicth page directory
     
-    n_frames = HIGH_MEMORY/PAGE_SIZE;
-    frames = (uint32_t*) kmalloc(INDEX_FROM_BIT(n_frames));
-    __memset__((uint8_t*)frames, 0, INDEX_FROM_BIT(n_frames));
 
     //get page directory
 
-    page_dir = (page_directory_t*) kmalloc_align(sizeof(page_directory_t));
+    page_dir = (page_directory_t*) mem_kmalloc_aligned(sizeof(page_directory_t));
     __memset__((uint8_t*)page_dir, 0, sizeof(page_directory_t));
+
     current_page_dir = page_dir;
+    //define addressing memory
+    for(uint32_t i= st_h;i<st_h+size_h;i+=0x1000){
+        get_page(i,1,current_page_dir);
+    }
+
     uint32_t i=0;
-    uint32_t cur_addr = start_addr;
-    while(i < start_addr){
-        __alloc_frame__(__get_page__(i, 1, page_dir), 0, 0);
+    while(i < current_addr_frame){
+        kalloc_identy_page(i, 1, 1);
         i+=PAGE_SIZE;
     }
     switch_page_directory(page_dir);
+
+    __kprint_video__("\npaging initialize --- [ ok ] \n");
 }
 
- __static__ __void__ __set_frame__(uint32_t frames_addr){
-    uint32_t frame = frames_addr/PAGE_SIZE;
-    uint32_t index_bit = INDEX_FROM_BIT(frame);
-    uint32_t offset_bit = OFFSET_FROM_BIT(frame);
-    frames[index_bit] |= (1 << offset_bit);
- }
-__static__ uint32_t __get_frame__(__void__){
-    uint32_t i,j;
-    for(i=0;i<INDEX_FROM_BIT(n_frames);i++){
-        if(frames[i] != 0xFFFFFFFF){
-            for(j=0; j<FBYTE; j++){
-                if(!(frames[i]&(1 << j))){
-                    return i*FBYTE+j;
-                }
-            }
-        }
-    }
-    return (uint32_t) -1;
-}
-__static__ __void__ __clear_frame__(uint32_t frames_addr){
-    uint32_t frame = frames_addr/PAGE_SIZE;
-    uint32_t index_bit = INDEX_FROM_BIT(frame);
-    uint32_t offset_bit = OFFSET_FROM_BIT(frame);
-    frames[index_bit] &= ~(1 << offset_bit);
-}
-__static__ uint32_t __test_frame__(uint32_t frames_addr){
-    uint32_t frame = frames_addr/PAGE_SIZE;
-    uint32_t index_bit = INDEX_FROM_BIT(frame);
-    uint32_t offset_bit = OFFSET_FROM_BIT(frame);
-    return (frames[index_bit] & (1 << offset_bit));
-}
-__void__ __alloc_frame__(page_t *page, uint32_t isKernel, uint32_t isWriteable){
-    if(page->frame != 0){
-        return;
-    }
-    else{
-        uint32_t index_bit = __get_frame__();
-        if(index_bit == (uint32_t) -1){
-            panic("No free frames!");
-        }
-        __set_frame__(index_bit*PAGE_SIZE);
-        page->present = 1;
-        page->rw = (isWriteable)?0:1;
-        page->user = (isKernel)?1:0;
-        page->frame = index_bit;
-    }
-}
-__void__ __free_frame__(page_t *page){
-    uint32_t frame;
-    if(!(frame = page->frame)){
-        return;
-    }else{
-        __clear_frame__(frame);
-        page->frame = 0x0;
-    }
-}
 
 __void__ switch_page_directory(page_directory_t* dir){
     current_page_dir = dir;
@@ -100,45 +126,4 @@ __void__ switch_page_directory(page_directory_t* dir){
     __asm__ __volatile__("mov %%cr0, %0":"=r"(cr0):);
     cr0 |= 0x80000000;
     __asm__ __volatile__("mov %0, %%cr0"::"r"(cr0));
-}
-
-page_t* __get_page__(uint32_t addr, int32_t make,page_directory_t* dir){
-    addr /= PAGE_SIZE;
-    uint32_t table_entry = addr/1024;
-    if(dir->tables[table_entry]){
-        return &dir->tables[table_entry]->pages[addr%1024];
-    }
-    else if(make){
-        uint32_t tmp;
-        dir->tables[table_entry] = (page_table_t*) kmalloc_phy_align(sizeof(page_table_t), &tmp);
-        __memset__((uint8_t*)dir->tables[table_entry], 0,sizeof(page_table_t));
-        dir->tables_physical[table_entry] = tmp|0x7;
-        return &dir->tables[table_entry]->pages[addr%1024];
-    }
-}
-
-uint32_t kmalloc_main (uint32_t size, int32_t align, uint32_t* physical_addr){
-    if(align == 1 && (start_addr & 0xFFFFF000)){
-        start_addr &= 0xFFFFF000;
-        start_addr += PAGE_SIZE;
-    }
-    if(physical_addr){
-        *physical_addr = start_addr;
-    }
-    uint32_t addr_p = start_addr;
-    start_addr += size;
-    return addr_p;
-}
-
-uint32_t kmalloc (uint32_t size){
-    return kmalloc_main(size, 0,0);
-}
-uint32_t kmalloc_align (uint32_t size){
-    return kmalloc_main(size, 1,0);
-}
-uint32_t kmalloc_phy (uint32_t size, uint32_t* physical_addr){
-    return kmalloc_main(size, 0,physical_addr);
-}
-uint32_t kmalloc_phy_align (uint32_t size, uint32_t* physical_addr){
-    return kmalloc_main(size, 1,physical_addr);
 }

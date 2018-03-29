@@ -8,7 +8,7 @@ LDPARAMS = -melf_i386
 
 BOOT = boot.o
 
-OBJECT = main.o gdt.o segment.o seg_asm.o pic.o idt.o handler.o keyboard.o pit.o paging.o mem.o video.o console.o pci.o string.o panic.o int.o terminal.o sys.o
+OBJECT = main.o gdt.o segment.o seg_asm.o pic.o idt.o handler.o keyboard.o pit.o bitmap.o paging.o mem.o video.o console.o pci.o string.o panic.o int.o sys.o heap.o sys_call.o alloc.o kernel.o opt.o
 
 %.o: kernel/%.asm
 	nasm $(NASMPARAMS) -o $@ $<
@@ -28,7 +28,7 @@ OBJECT = main.o gdt.o segment.o seg_asm.o pic.o idt.o handler.o keyboard.o pit.o
 %.o: drivers/keyboard/%.c
 	gcc $(GCCPARAMS) -o $@ -c $<
 
-%.o: drivers/graphics/%.c
+%.o: drivers/vram/%.c
 	gcc $(GCCPARAMS) -o $@ -c $<
 
 %.o: drivers/pci/%.c
@@ -67,4 +67,3 @@ build:
 	make clean
 	make install
 	make nadia.iso
-	make qemu

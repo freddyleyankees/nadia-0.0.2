@@ -1,8 +1,17 @@
+/**
+ *	Nadia operating system 
+ *  @Author Kabong freddy
+ *  @copyright(c) 2017 - 2018
+ *  @Email freddyleyankees@gmail.com
+ * 
+ */
+
 #ifndef __INTERRUPT_H__
 #define __INTERRUPT_H__
 #include "types.h"
 #include "handler.h"
 #include "int.h"
+#include "sys_call.h"
 
 #define ISR0 0
 #define ISR1 1
@@ -77,6 +86,7 @@ __void__ align_check(__void__);
 __void__ machine_check(__void__);
 __void__ fp_excep(__void__);
 __void__ default_int(__void__);
+__void__ sys_call(__void__);
 
 __void__ init_int(__void__);
 #endif

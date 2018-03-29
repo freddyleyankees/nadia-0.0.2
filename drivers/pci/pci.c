@@ -1,3 +1,10 @@
+/**
+ *	Nadia operating system 
+ *  @Author Kabong freddy
+ *  @copyright(c) 2017 - 2018
+ *  @Email freddyleyankees@gmail.com
+ * 
+ */
 
 #include "pci.h"
 __extern__ __void__ __kprint_video__(const char* str);

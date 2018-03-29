@@ -1,9 +1,15 @@
+/**
+ *	Nadia operating system 
+ *  @Author Kabong freddy
+ *  @copyright(c) 2017 - 2018
+ *  @Email freddyleyankees@gmail.com
+ * 
+ */
+
 #include "../include/pit.h"
 #include "../include/io.h"
 #include "../include/string.h"
-
-__extern__ __void__ __kprint_video__(const char* str);
-__extern__ __void__ __blink_Cursor__(__void__);
+#include "../drivers/vram/display.h"
 
 __static__ __void__ __timer_callback__(registers_t reg){
 	__static__ uint32_t tic = 0;

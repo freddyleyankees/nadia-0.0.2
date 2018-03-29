@@ -1,3 +1,11 @@
+/**
+ *	Nadia operating system 
+ *  @Author Kabong freddy
+ *  @copyright(c) 2017 - 2018
+ *  @Email freddyleyankees@gmail.com
+ * 
+ */
+
 #include "config.h"
 #ifndef __TYPES_H__
 #define __TYPES_H__
@@ -20,7 +28,10 @@
 	typedef unsigned int pid_t;
 	typedef unsigned int size_t;
 	typedef void* type_t;
-	__extern__ uint8_t* _stdin_;
-	__extern__ uint8_t* _stdout_;
-	__extern__ uint8_t* _stderr_;
+	
+	#ifndef __CONSTANTE_H__
+	#define __CONSTANTE_H__
+	#include "const.h"
+	#endif
+
 #endif

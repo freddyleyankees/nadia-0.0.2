@@ -1,8 +1,15 @@
+/**
+ *	Nadia operating system 
+ *  @Author Kabong freddy
+ *  @copyright(c) 2017 - 2018
+ *  @Email freddyleyankees@gmail.com
+ * 
+ */
+
 #ifndef __IDT_H__
 #define __IDT_H__
-#define __MEMORY_H__
-#include "segment.h"
 
+#include "types.h"
 	#define __INTGATE__	  		0x8E		
 	#define __TRAPGATE__ 		0x8F	
 	#define __SYSTEMGATE__	 	0xEF
@@ -84,5 +91,6 @@
 	__extern__ __void__ __asm_irq_13__(__void__);
 	__extern__ __void__ __asm_irq_14__(__void__);
 	__extern__ __void__ __asm_irq_15__(__void__);
+	__extern__ __void__ __sys_call__(__void__);
 
 #endif

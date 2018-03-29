@@ -1,16 +1,20 @@
+/**
+ *	Nadia operating system 
+ *  @Author Kabong freddy
+ *  @copyright(c) 2017 - 2018
+ *  @Email freddyleyankees@gmail.com
+ * 
+ */
+
+
+#ifndef __PAGING_H__
+#define __PAGING_H__
+
+
 #include "types.h"
-#include "handler.h"
-#include "segment.h"
-#ifdef __PAGING_H__
 
-#define PAGE_SIZE               0x1000
-#define BYTE                    0x8
-#define FBYTE                   0x20
-#define INDEX_FROM_BIT(addr)    (addr/FBYTE)
-#define OFFSET_FROM_BIT(addr)   (addr%FBYTE)
-
-
-typedef struct page_count{
+/*this structure is not change if you know what you do*/
+typedef struct page{
     uint32_t present    :1;
     uint32_t rw         :1;
     uint32_t user       :1;
@@ -32,35 +36,19 @@ typedef struct page_directory{
     uint32_t physical_addr;
 }page_directory_t;
 
+#ifdef __PAGE_DIRECTORY__
+page_directory_t* current_page_dir;
+#else 
+__extern__ page_directory_t* current_page_dir;
+#endif
 
-typedef struct headBlock{
-    uint32_t     size;
-    uint32_t    Hflag;
-    uint32_t*    next;
-}headBlock_t;
-
-typedef struct heap{
-    headBlock_t* Hblock;
-    uint32_t    size;
-    uint32_t    Hflag;
-    uint32_t    count;
-}head_t;
-
-    __void__ __init_paging__(__void__);
-    __static__ __void__ __set_frame__(uint32_t);
-    __static__ uint32_t __get_frame__(__void__);
-    __static__ __void__ __clear_frame__(uint32_t);
-    __static__ uint32_t __test_frame__(uint32_t);
-    __void__ __alloc_frame__(page_t*, uint32_t, uint32_t);
-    __void__ __free_frame__(page_t*);
-    __void__ switch_page_directory(page_directory_t*);
-    page_t* __get_page__(uint32_t, int32_t, page_directory_t*);
-    uint32_t kmalloc_main (uint32_t, int32_t, uint32_t*);
-    uint32_t kmalloc (uint32_t);
-    uint32_t kmalloc_align (uint32_t);
-    uint32_t kmalloc_phy (uint32_t, uint32_t*);
-    uint32_t kmalloc_phy_align (uint32_t, uint32_t*);
-    __void__ kfree (uint32_t, uint32_t*);
+__void__ __init_paging__(__void__);
 
 
+__void__ swicth_directory_page(page_directory_t*);
+__void__ update_directory_page(page_directory_t*);
+__void__ kalloc_identy_page(uint32_t, uint32_t , uint32_t );
+__void__ kalloc_page(page_t*, uint32_t, uint32_t);
+page_t *get_page(uint32_t,uint32_t, page_directory_t*);
+__void__ kfree_page(page_t*);
 #endif

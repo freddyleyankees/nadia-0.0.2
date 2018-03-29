@@ -1,6 +1,13 @@
+/**
+ *	Nadia operating system 
+ *  @Author Kabong freddy
+ *  @copyright(c) 2017 - 2018
+ *  @Email freddyleyankees@gmail.com
+ * 
+ */
+
 #include "../include/idt.h"
-
-
+#include "../include/mem.h"
 
 idt_entry_t idt_entry[256];
 idt_ptr_t idt_ptr;
@@ -61,6 +68,7 @@ __extern__ __void__ __init_idt__(__void__){
 	__set_idt__(45,(uint32_t) __asm_irq_13__,0x08, __INTGATE__);
 	__set_idt__(46,(uint32_t) __asm_irq_14__,0x08, __INTGATE__);
 	__set_idt__(47,(uint32_t) __asm_irq_15__,0x08, __INTGATE__);
+	__set_idt__(96,(uint32_t) __sys_call__,0x08, __INTGATE__);
 
 
 	__idt_up__((uint32_t) &idt_ptr);

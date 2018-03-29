@@ -1,7 +1,15 @@
+/**
+ *	Nadia operating system 
+ *  @Author Kabong freddy
+ *  @copyright(c) 2017 - 2018
+ *  @Email freddyleyankees@gmail.com
+ * 
+ */
+
 #include "../include/int.h"
 #include "../include/string.h"
 #include "../include/panic.h"
-#include "../drivers/graphics/display.h"
+#include "../drivers/vram/display.h"
 
 __static__ __void__ isr0_callback(registers_t reg){
     __kprint_video__("interrupt divide by zero");
@@ -142,33 +150,32 @@ __static__ __void__ isr14_callback(registers_t reg){
     reserved =   reg.err_code & 0x8;
     id       =   reg.err_code & 0x10;
 
-    str = __itoab__(reg.num_int,16);
-    __kprint_video__("interrupt 0x");
-    __kprint_video__(str);
-    __kprint_video__("\n");
-    error = __itoab__(reg.err_code,16);
-    __kprint_video__("Error : ");
-    __kprint_video__(error);
-    __kprint_video__("\n");
+    
     if(present){
-        str = __itoab__(addr_error,16);
-        __kprint_video__("page ");
+        str = __itoab__(reg.num_int,16);
+        __kprint_video__("\n");
+        __kprint_video__("\ninterrupt 0x");
         __kprint_video__(str);
-        __kprint_video__(" is not present!\n");
+        str = __itoab__(reg.err_code,16);
+        __kprint_video__("\nerror interrupt number ");
+        __kprint_video__(str);
+        str = __itoab__(addr_error,16);
+        __kprint_video__("\nAddress error 0x");
+        __kprint_video__(str);
+        panic("\nthis page is not present \n");
     }
     if(rw){
-        __kprint_video__("this page is in mode [ Read-only ]\n");
+        panic("this page is in mode [ Read-only ]\n");
     }
     if(user){
-        __kprint_video__("this page is not access in [ user-mode ]\n");
+        panic("this page is not access in [ user-mode ]\n");
     }
     if(reserved){
-        __kprint_video__("you want access to page reserved by cpu");
+        panic("you want access to page reserved by cpu");
     }
     if(id){
-        __kprint_video__("intruction not found\n");
+        panic("intruction not found\n");
     }
-    panic("panic system : page fault -- [ End system ]");
 }
 __static__ __void__ isr16_callback(registers_t reg){
     uint8_t* str;
@@ -267,6 +274,9 @@ __void__ machine_check(__void__){
 __void__ fp_excep(__void__){
     __register_int_handler__(ISR19,&isr19_callback);
 }
+__void__ sys_call(__void__){
+    __register_int_handler__(INT_SYS_CALL,&syscall_callback);
+}
 __void__ default_int(__void__){
     __register_int_handler__(ISR1,&isr_reserved_callback);
     __register_int_handler__(ISR15,&isr_reserved_callback);
@@ -303,4 +313,5 @@ __void__ init_int(__void__){
     machine_check();
     fp_excep();
     default_int();
+    sys_call();
 }

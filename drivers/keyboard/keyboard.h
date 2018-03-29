@@ -1,3 +1,11 @@
+/**
+ *	Nadia operating system 
+ *  @Author Kabong freddy
+ *  @copyright(c) 2017 - 2018
+ *  @Email freddyleyankees@gmail.com
+ * 
+ */
+
 #include "../../include/handler.h"
 #ifndef __DRIVER_KEYBOARD_H__
 #define __DRIVER_KEYBOARD_H__
@@ -40,7 +48,6 @@
 
 #define __KEYBOARD_NO_DEFINE__				0x0
 #define __KEYBOARD_DEFINE__					0x1
-
 
 
 #define __wait_input_buf_empty__()		({										 	\

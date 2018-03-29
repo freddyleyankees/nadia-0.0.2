@@ -1,7 +1,15 @@
+/**
+ *	Nadia operating system 
+ *  @Author Kabong freddy
+ *  @copyright(c) 2017 - 2018
+ *  @Email freddyleyankees@gmail.com
+ * 
+ */
+
 #include "../include/panic.h"
-#include "../drivers/graphics/display.h"
+#include "../drivers/vram/display.h"
 
 __void__ panic(uint8_t* str){
     __kprint_video__(str);
-    __asm__ __volatile__("hlt"::);
+    __asm__ __volatile__("cli;hlt;end: jmp end"::);
 }
